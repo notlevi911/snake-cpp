@@ -66,6 +66,7 @@ public:
         //body 0  is snakes head 
         body.push_front(Vector2Add(body[0],direction));
     }
+    
 };
 
 class Food {
@@ -88,39 +89,63 @@ public:
     }
 };
 
+class Game{
+public:
+    Snake snake = Snake();
+    Food food = Food();
+
+    void Draw()
+    {
+        food.Draw();
+        snake.Draw();
+    }
+    void Update()
+    {
+        snake.Update();
+    }
+    void CheckCollisionWithFood()
+    {
+        if(Vector2Equals(snake.body[0], food.position))
+        {
+            food.randomizePosition();
+            // Add new segment to snake bo
+            snake.body.push_front(Vector2Add(snake.body[0],snake.direction));
+        }
+    }
+};
 int main() {
     InitWindow(750, 750, "NAGIN");
     SetTargetFPS(60);
 
-    Food food = Food();
-    Snake snake = Snake();
+    Game game =  Game();
 
     while(!WindowShouldClose()) {
         BeginDrawing();
 
             if(eventTriggered(0.2))
             {
-                snake.Update();
+                game.Update();
+                game.CheckCollisionWithFood();
             }
-            if(IsKeyPressed(KEY_UP) && snake.direction.y !=1)
+            if(IsKeyPressed(KEY_UP) && game.snake.direction.y !=1)
             {
-                snake.direction = {0,-1};
+                game.snake.direction = {0,-1};
             }
-            if(IsKeyPressed(KEY_DOWN)&& snake.direction.y !=-1)
+            if(IsKeyPressed(KEY_DOWN)&& game.snake.direction.y !=-1)
             {
-                snake.direction = {0,1};
+                game.snake.direction = {0,1};
             }
-            if(IsKeyPressed(KEY_LEFT)&& snake.direction.x !=1)
+            if(IsKeyPressed(KEY_LEFT)&& game.snake.direction.x !=1)
             {
-                snake.direction = {-1,-0};
+                game.snake.direction = {-1,-0};
             }
-            if(IsKeyPressed(KEY_RIGHT)&& snake.direction.x !=-1)
+            if(IsKeyPressed(KEY_RIGHT)&& game.snake.direction.x !=-1)
             {
-                snake.direction = {1,0};
+                game.snake.direction = {1,0};
             }
+
             ClearBackground(green);
-            food.Draw();
-            snake.Draw();
+            game.Draw();
             
         EndDrawing();
     }
