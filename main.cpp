@@ -29,6 +29,8 @@ Color darkGreen = {43,51,24,255};
 
 int cellSize = 30;
 int cellCount = 25;
+int offset = 100;
+
 
 double lastUpdateTime=0;
 
@@ -43,6 +45,16 @@ bool eventTriggered(double interval)
     return false;       
 }
 
+bool ElementInDeque(Vector2 a , deque<Vector2> b)
+{
+    for(unsigned int i = 0; i < b.size(); i++)
+    {
+        if(Vector2Equals(a, b[i]))
+            return true;
+    }
+    return false;
+}
+
 class Snake
 {
 public:
@@ -55,7 +67,7 @@ public:
         {
             float x = body[i].x;
             float y = body[i].y;
-            Rectangle segment = Rectangle{x * cellSize,y * cellSize, (float)cellSize, (float)cellSize};
+            Rectangle segment = Rectangle{offset+x * cellSize,offset+y * cellSize, (float)cellSize, (float)cellSize};
             DrawRectangleRounded(segment,0.5,6, darkGreen);
 
         }    
@@ -66,7 +78,10 @@ public:
         //body 0  is snakes head 
         body.push_front(Vector2Add(body[0],direction));
     }
-    
+    void Reset(){
+        body = {Vector2{6,9}, Vector2{5,9}, Vector2{4,9}};
+        direction ={1,0};
+    }
 };
 
 class Food {
@@ -80,7 +95,7 @@ public:
     }
 
     void Draw() {
-        DrawRectangle(position.x * cellSize, position.y * cellSize, cellSize, cellSize, darkGreen);
+        DrawRectangle(offset+position.x * cellSize, offset+position.y * cellSize, cellSize, cellSize, darkGreen);
     }
 
     void randomizePosition() {
@@ -93,6 +108,9 @@ class Game{
 public:
     Snake snake = Snake();
     Food food = Food();
+    bool running = true;
+    int score = 0;
+    int highScore = 0;
 
     void Draw()
     {
@@ -101,7 +119,13 @@ public:
     }
     void Update()
     {
-        snake.Update();
+        if(running)
+        {
+            snake.Update();
+            CheckCollisionWithFood();
+            CheckCollionWithEdges();
+            CheckCollisionWithTail();
+        }
     }
     void CheckCollisionWithFood()
     {
@@ -110,11 +134,46 @@ public:
             food.randomizePosition();
             // Add new segment to snake bo
             snake.body.push_front(Vector2Add(snake.body[0],snake.direction));
+            score++;
         }
+    }
+    void CheckCollionWithEdges()
+    {
+        if(snake.body[0].x ==cellCount || snake.body[0].x == -1)
+        {
+            GameOver();
+        }
+        if(snake.body[0].y ==cellCount || snake.body[0].y == -1)
+        {
+            GameOver();
+        }
+    }
+    void CheckCollisionWithTail()
+    {
+
+        deque<Vector2> headlessBody = snake.body;
+        headlessBody.pop_front();
+        if(ElementInDeque(snake.body[0],headlessBody))
+        {
+            GameOver();
+        }
+    }
+    void GameOver()
+    {
+        snake.Reset();
+        food.randomizePosition();
+        running = false;
+        if (score >= highScore){
+            highScore = score;
+        }
+        score = 0;
+        
+
+
     }
 };
 int main() {
-    InitWindow(750, 750, "NAGIN");
+    InitWindow(2*offset+cellSize * cellCount, 2*offset+cellSize * cellCount, "NAGIN");
     SetTargetFPS(60);
 
     Game game =  Game();
@@ -125,26 +184,35 @@ int main() {
             if(eventTriggered(0.2))
             {
                 game.Update();
-                game.CheckCollisionWithFood();
+                // could have made these two calls in the game update, but am too lazy
+                //UPDATE I JUST DID CAUSE THAT WAS BETTER 
             }
             if(IsKeyPressed(KEY_UP) && game.snake.direction.y !=1)
             {
                 game.snake.direction = {0,-1};
+                game.running=true;
             }
             if(IsKeyPressed(KEY_DOWN)&& game.snake.direction.y !=-1)
             {
                 game.snake.direction = {0,1};
+                game.running=true;
             }
             if(IsKeyPressed(KEY_LEFT)&& game.snake.direction.x !=1)
             {
                 game.snake.direction = {-1,-0};
+                game.running=true;
             }
             if(IsKeyPressed(KEY_RIGHT)&& game.snake.direction.x !=-1)
             {
                 game.snake.direction = {1,0};
+                game.running=true;
             }
 
             ClearBackground(green);
+            DrawRectangleLinesEx(Rectangle{(float)offset-5,(float)offset-5,(float)cellSize*cellCount+10,(float)cellSize*cellCount+10},5, darkGreen);
+            DrawText("SAANP",offset-5,20,20,darkGreen);
+            DrawText(TextFormat("%i",game.score),offset-5,offset+cellSize*cellCount+10,20,darkGreen);
+            DrawText(TextFormat("HIGH SCORE %i",game.highScore),offset-5,offset+cellSize*cellCount+50,10,darkGreen);
             game.Draw();
             
         EndDrawing();

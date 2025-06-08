@@ -35,4 +35,6 @@ make
 
 Well its still not done yet
 
+EDIT I JUST FINISHED IT MGHT ADD SOME EXTRA FEATURES THO
+
 Tho its just for my own learning of cpp
