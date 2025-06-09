@@ -1,23 +1,4 @@
-/*******************************************************************************************
-*
-*   raylib [core] example - Basic 3d example
-*
-*   Welcome to raylib!
-*
-*   To compile example, just press F5.
-*   Note that compiled executable is placed in the same folder as .c file
-*
-*   You can find all basic examples on C:\raylib\raylib\examples folder or
-*   raylib official webpage: www.raylib.com
-*
-*   Enjoy using raylib. :)
-*
-*   This example has been created using raylib 1.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2013-2025 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
+
 #include<iostream>
 #include <raylib.h>
 #include <deque>
@@ -111,6 +92,7 @@ public:
     bool running = true;
     int score = 0;
     int highScore = 0;
+    float speed = 0.20;
 
     void Draw()
     {
@@ -135,6 +117,8 @@ public:
             // Add new segment to snake bo
             snake.body.push_front(Vector2Add(snake.body[0],snake.direction));
             score++;
+            if(speed>=0.01){
+            speed=speed-0.01;}
         }
     }
     void CheckCollionWithEdges()
@@ -167,6 +151,7 @@ public:
             highScore = score;
         }
         score = 0;
+        speed = 0.2;
         
 
 
@@ -181,7 +166,7 @@ int main() {
     while(!WindowShouldClose()) {
         BeginDrawing();
 
-            if(eventTriggered(0.2))
+            if(eventTriggered(game.speed))
             {
                 game.Update();
                 // could have made these two calls in the game update, but am too lazy
